@@ -1,0 +1,444 @@
+---
+title: "Homework2"
+author: "JiaRuoyu"
+date: "2/7/2018"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+require(kableExtra)
+```
+
+#question1
+##(a)
+$$
+L(\theta)=\prod_{i=1}^np(x_i;\theta)=\prod_{i=1}^n\frac{1}{\pi[1+(x_i-\theta)^2]}=\frac{1}{\pi^n}\prod_{i=1}^n\frac{1}{1+(x_i-\theta)^2}
+$$
+
+$$
+l(\theta)=\ln L(\theta)=\ln (\frac{1}{\pi^{n}}\prod_{i=1}^n\frac{1}{1+(x_i-\theta)^2})= -n\ln \pi-\sum_{i=1}^n\ln (1+(\theta-x_i)^2)
+$$
+$$
+l'(\theta)=(-\sum_{i=1}^n\ln (1+(\theta-x_i)^2))'=-\sum_{i=1}^n\frac{2(\theta-x_i)}{1+(\theta-x_i)^2}=-2\sum_{i=1}^n\frac{\theta-x_i}{1+(\theta-x_i)^2}
+$$
+
+$$
+l''(\theta)=-2\sum_{i=1}^n\frac{1+(\theta-x_i)^2-2(\theta-x_i)^2}{[1+(\theta-x_i)^2]^2}=-2\sum_{i=1}^n\frac{1-(\theta-x_i)^2}{[1+(\theta-x_i)^2]^2}
+$$
+$$
+P(x)=\frac{1}{\pi(1+x^2)} 
+$$
+$$
+P'(x)=-\frac{1}{\pi}~\frac{2x}{(1+x^2)^2} 
+$$
+
+$$
+P'(x)^2=\frac{4}{\pi^2}~\frac{x^2}{(1+x^2)^4} 
+$$
+
+$$
+I(\theta)=n\int\frac{{p'(x)}^2}{p(x)}dx=\frac{4n}{\pi}\int_{-\infty}^\infty\frac{x^2dx}{(1+x^2)^3}
+$$
+<font size = 3>*Let $x=\tan\beta$, then we have  $1+\tan^2\beta=\arcsin^2\beta=\frac{1}{\cos^2\beta}$, s.t.*</font>
+
+$$
+I(\theta)=\frac{4n}{\pi}\int_{-\frac{\pi}{2}}^{\frac{\pi}{2}}\frac{\tan^2\beta}{(1+tan^2\beta)^3}\frac{1}{\\cos^2\beta}d\beta=\frac{4n}{\pi}\int_{-\frac{\pi}{2}}^{\frac{\pi}{2}}\sin^2\beta\cos^2\beta~d\beta=\frac{4n}{\pi}\int_{-\frac{\pi}{2}}^{\frac{\pi}{2}}\sin^2\beta(1-\sin^2\beta)~d\beta=\frac{4n}{\pi}\int_{-\frac{\pi}{2}}^{\frac{\pi}{2}}\sin^2\beta-\sin^4\beta~d\beta
+$$
+
+<font size = 3>*As $1-\cos2\beta=2\sin^2\beta$, then we have*</font>
+
+$$
+\int_{-\frac{\pi}{2}}^{\frac{\pi}{2}}\sin^2\beta~d\beta=\frac{1}{2}\int_{-\frac{\pi}{2}}^{\frac{\pi}{2}}(1-\cos2\beta)d\beta=\frac{1}{2}(\beta-\frac{1}{2}\sin2\beta)|_{-\frac{\pi}{2}}^{\frac{\pi}{2}}~=\frac{1}{2}
+$$
+
+$$
+\int_{-\frac{\pi}{2}}^{\frac{\pi}{2}}\sin^4\beta~d\beta=\frac{1}{4}\int_{-\frac{\pi}{2}}^{\frac{\pi}{2}}(1-\cos2\beta)^2d\beta=\frac{1}{4}\int_{-\frac{\pi}{2}}^{\frac{\pi}{2}}\cos^22\beta-2\cos2\beta+1~d\beta
+$$
+$$
+=\frac{1}{4}\int_{-\frac{\pi}{2}}^{\frac{\pi}{2}}\frac{\cos4\beta}{2}-2\cos2\beta+\frac{3}{2}~d\beta=\frac{1}{4}(\frac{1}{8}\sin4\beta-\sin2\beta+\frac{3}{2}\beta)|_{-\frac{\pi}{2}}^{\frac{\pi}{2}}~=\frac{3\pi}{8}
+$$
+
+<font size = 3>*Finally we have:* </font>
+$$
+I(\theta)=\frac{4n}{\pi}(\frac{\pi}{2}-\frac{3\pi}{8})=\frac{n}{2}
+$$
+
+##(b)
+
+```{r, echo=FALSE}
+q1=c(1.77,-0.23,2.76,3.80,3.47,56.75,-1.34,4.24,-2.44,3.29,3.71,-2.40,4.53,-0.07,-1.05,-13.87,-2.53,-1.75)
+
+n = length(q1)
+
+l <- function(a) {
+    return(n*log(pi) + sum(log(1+(a-q1)^2))) #-log
+}
+  
+l.grid <- function(a) {
+    return(2*sum((a-q1)/(1+(a-q1)^2))) #-l.grid
+}
+  
+l.hess <- function(a) {
+    return(matrix(2*sum((1-(a-q1)^2)/(1+(a-q1)^2)^2),nrow=1)) #-l.hess
+}
+
+#newton method
+a.est <- function(starting) {
+  theta <- nlminb(start=starting,l,l.grid,l.hess)$par
+  return(theta)
+}
+
+# plot
+a.value = seq(-2, 4, by=0.05)
+log.like = c()
+for (i in 1:length(a.value)){
+  log.like[i] = -l(a.value[i])
+}
+plot(a.value, log.like, xlab="parameter",ylab="log-likelihood", type="l")
+
+a.est(-11)
+a.est(-1)
+a.est(0)
+a.est(1.5)
+a.est(4)
+a.est(4.7)
+a.est(7)
+a.est(8)
+a.est(38)
+```
+##(c)
+<font size = 3>For each vector, vector[1] is the estimation when $\alpha=1$, vector[2] is the estimation when $\alpha=0.64$, vector[3] is the estimation when $\alpha=0.25$ </font>
+```{r, echo=FALSE}
+#fix point method
+a.est.fix <- function(starting) {
+  alpha <- c(1,0.64,0.25)
+  a <- c()
+  for (j in 1:3){
+    l.hess.fix <- function(a) {
+    return(matrix(1/alpha[j],nrow=1))
+  }
+    a[j] <- nlminb(start=starting,l,l.grid,l.hess.fix)$par
+  }
+  return(a)
+}
+a.est.fix(-11)
+a.est.fix(-1)
+a.est.fix(0)
+a.est.fix(1.5)
+a.est.fix(4)
+a.est.fix(4.7)
+a.est.fix(7)
+a.est.fix(8)
+a.est.fix(38)
+```
+
+##(d)
+```{r,echo=FALSE}
+#fisher scoring
+a.est.fisher <- function(starting){
+  theta <- starting
+  delta <- 1
+  while(abs(delta) >= 0.00001){
+    theta1 <- theta 
+    dl <- l.grid(theta)
+    theta <- theta - dl/(n/2)
+    delta <- theta - theta1
+  }
+  return(theta)
+}
+
+a.est.fisher(-11)
+a.est.fisher(-1)
+a.est.fisher(0)
+a.est.fisher(1.5)
+a.est.fisher(4)
+a.est.fisher(4.7)
+a.est.fisher(7)
+a.est.fisher(8)
+a.est.fisher(38)
+```
+
+##(e)
+<font size = 3>speed: The speed of convergence of Newton method is the fastest. And the speed of Fisher method and Fixed-Point method is normal. 
+
+stability: The stability of the Newton method is the worst. The stability of fisher method is good. And the stability of Fixed-Point method depends on $\alpha$, the smaller the $\alpha$ is, the better stability will be.</font>
+
+
+#question 2
+##(a)
+<font size = 3>*As $p(x;\theta)= \frac{1-\cos(x-\theta)}{2\pi},~0\leqslant x\leqslant2\pi,~\theta\in(-\pi,\pi),$ then we have*</font>
+$$
+L(\theta)=\prod_{i=1}^n\frac{1-\cos(x_i-\theta)}{2\pi}=\frac{1}{(2\pi)^n}\prod_{i=1}^n[1-\cos(x_i-\theta)]
+$$
+
+$$
+l(\theta)=-n\log(2\pi)+\sum_{i=1}^n\log[1-\cos(x_i-\theta)]
+$$
+```{r,echo=FALSE}
+#plot
+q2 = c(3.91,4.85,2.28,4.06,3.70,4.04,5.46,3.53,2.28,1.96,2.53,3.88,2.22,3.47,4.82,2.46,2.99,2.54,0.52)
+a.value = seq(-pi, pi, by=0.05)
+n = length(q2)
+log.like = c()
+for (i in 1:length(a.value)){
+  log.like[i] = -n*log(2*pi)+sum(log(1-cos(q2-a.value[i])))
+}
+plot(a.value, log.like, xlab="parameter",
+     ylab="log-likelihood", type="l")
+```
+
+##(b)
+
+$$
+E(x|\theta)=\int_{0}^{2\pi}xP(x|\theta)~dx=\int_{0}^{2\pi}x~\frac{1-\cos(x-\theta)}{2\pi}~dx=\frac{1}{2\pi}\int_{0}^{2\pi}x-x\cos(x-\theta)~dx=\pi-\frac{1}{2\pi}\int_{0}^{2\pi}x\cos(x-\theta)~dx
+$$
+$$
+\int_{0}^{2\pi}x\cos(x-\theta)~dx=x\sin(x-\theta)|_0^{2\pi}-\int_{0}^{2\pi}\sin(x-\theta)~dx=-2\pi\sin\theta+\cos(x-\theta)|_0^{2\pi} =-2\pi\sin\theta
+$$
+$$
+E(x|\theta)=\pi+\sin\theta=\bar{x}
+$$
+$$
+\hat{\theta}_{moment}=\arcsin(\bar{x}-\pi)
+$$
+```{r,echo=FALSE}
+a.est <- function(sample,starting) {
+  n = length(sample)
+  
+  l <- function(a) {
+    return(-n*log(2*pi) + sum(log(1-cos(sample-a)))) #log
+  }
+  
+  l.grid <- function(a) {
+    return(sum(sin(a-sample)/(1-cos(a-sample)))) #l.grid
+  }
+  
+  l.hess <- function(a) {
+    return(sum(1/(cos(a-sample)-1))) #l.hess
+  }
+  
+  ## newton method  
+  theta <- starting
+  delta <- 1
+  while(abs(delta) >= 1e-10){
+    theta1 <- theta 
+    dl <- l.grid(theta)
+    ddl <- l.hess(theta)
+    if (ddl==0){
+      return(NULL)
+    }
+    theta <- theta - dl/ddl
+    delta <- theta - theta1
+  }
+  
+  return(c(theta,l(theta)))
+}
+
+q2 = c(3.91,4.85,2.28,4.06,3.70,4.04,5.46,3.53,2.28,1.96,2.53,3.88,2.22,3.47,4.82,2.46,2.99,2.54,0.52)
+m = mean(q2)
+theta0 = asin(m-pi)
+theta0
+```
+##(c)
+```{r,echo=FALSE}
+a.est1 = a.est(q2,theta0)
+a.est1[1]
+```
+##(d)
+```{r,echo=FALSE}
+a.est2 = a.est(q2,-2.7)
+a.est3 = a.est(q2,2.7)
+a.est2[1]
+a.est3[1]
+```
+##(e)
+```{r,echo=FALSE}
+a.value = seq(-pi,pi,by = 2*pi/199); # set 200 equally spaced starting point
+a.par = c()
+a.mle = c()
+for (i in 1:length(a.value)){
+  a.par[i] = a.est(q2,a.value[i])[1]
+  a.mle[i] = a.est(q2,a.value[i])[2]
+}
+
+ascend = order(a.mle)
+a.mle.ascend = a.mle[ascend]
+a.par.ascend = a.par[ascend]
+
+# find the unique outcome
+j = 1
+p = 2
+i = 1
+e = c()
+e[1] = a.mle.ascend[1]
+while(j<=200){
+  if(a.mle.ascend[i]!=a.mle.ascend[j]){
+    e[p] = a.mle.ascend[j]
+    p = p+1
+    i = j
+    j = j+1
+  }else{j = j+1}
+}
+
+# classify the starting point according to the unique outcome
+group = matrix(nrow = length(e),ncol = 46)
+for (y in 1:length(e)){
+  t = 1
+  for (i in 1:200){
+    if(a.mle.ascend[i]== e[y]){
+      group[y,t] = round(a.value[ascend[i]],5)
+      t = t+1
+    }
+  }
+}
+group[is.na(group)]=""
+colnames(group) <- c(1:46)
+knitr::kable(group)
+```
+
+#question3
+##(a)
+<font size = 3>The start point is (1200,0.2), and we get  $K=1049.4038970,~r=0.1182693$</font>
+```{r,echo=FALSE}
+t <- c(0,8,28,41,63,69,97,117,135,154)
+x <- c(2,47,192,256,768,896,1120,896,1184,1024)
+f <- expression(2*K/(2+(K-2)*exp(-r*t)))
+
+df <- function(K,r,t){
+  dfk <- D(f,"K")
+  dfr <- D(f,"r")
+  K <- K 
+  r <- r 
+  t <- t
+  a <- eval(dfk)
+  b <- eval(dfr)
+  c <- array(c(a,b),c(1,2))
+  return(c)
+}
+
+Df <- function(K,r){
+  a <- K
+  b <- r
+  m <- df(a,b,t[1])
+  for(i in 2:10){
+    c <- df(a,b,t[i])
+    m <- rbind(m,c)
+  }
+  return(m)
+}
+
+Z <- function(K,r){
+  a <- c()
+  for(i in 1:10){
+    a[i] <- x[i] - 2*K/(2+(K-2)*exp(-r*t[i]))
+  }
+  m <- array(a,c(10,1))
+  return(m)
+}
+
+theta <- matrix(c(1200,0.2),nrow=2)
+delta <- matrix(c(1,1),nrow=2)
+
+#Gauss-Newton method
+while(crossprod(delta,delta)>=0.001){
+  theta1 <- theta 
+  a <- Df(theta[1,1],theta[2,1])
+  z <- Z(theta[1,1],theta[2,1])
+  theta <- theta + solve(t(a)%*%a)%*%t(a)%*%z
+  delta <- theta - theta1
+}
+
+a.est <- theta
+print(a.est)
+```
+
+##(b)
+```{r,echo=FALSE}
+f <- function(K,r){
+  return(sum((x-2*K/(2+(K-2)*exp(-r*t)))^2))
+}
+
+z <- matrix(0,100,100,byrow=T)
+for (i in 1:100){
+  for (j in 1:100){
+    K <- 600 + 8*j
+    r <- 0 + 0.01*i
+    z[j,i] <- f(K,r)
+  }
+}
+K <- seq(600,1400,length.out = 100)
+r <- seq(0,1,length.out = 100)
+contour(K,r,z,xlab="K",ylab="r")
+```
+
+##(c)
+```{r,echo=FALSE}
+l <- expression(log(1/(sqrt(2*pi)*sigma))-
+     (log((2*2+2*(K-2)*exp(-r*0))/(2*K)))^2/(2*sigma^2)+
+     log(1/(sqrt(2*pi)*sigma))-
+     (log((2*47+47*(K-2)*exp(-r*8))/(2*K)))^2/(2*sigma^2)+
+     log(1/(sqrt(2*pi)*sigma))-
+     (log((2*192+192*(K-2)*exp(-r*28))/(2*K)))^2/(2*sigma^2)+
+     log(1/(sqrt(2*pi)*sigma))-
+     (log((2*256+256*(K-2)*exp(-r*41))/(2*K)))^2/(2*sigma^2)+
+     log(1/(sqrt(2*pi)*sigma))-
+     (log((2*768+768*(K-2)*exp(-r*63))/(2*K)))^2/(2*sigma^2)+
+     log(1/(sqrt(2*pi)*sigma))-
+     (log((2*896+896*(K-2)*exp(-r*69))/(2*K)))^2/(2*sigma^2)+
+     log(1/(sqrt(2*pi)*sigma))-
+     (log((2*1120+1120*(K-2)*exp(-r*97))/(2*K)))^2/(2*sigma^2)+
+     log(1/(sqrt(2*pi)*sigma))-
+     (log((2*896+896*(K-2)*exp(-r*117))/(2*K)))^2/(2*sigma^2)+
+     log(1/(sqrt(2*pi)*sigma))-
+     (log((2*1185+1184*(K-2)*exp(-r*135))/(2*K)))^2/(2*sigma^2)+
+     log(1/(sqrt(2*pi)*sigma))-
+     (log((2*1024+1024*(K-2)*exp(-r*154))/(2*K)))^2/(2*sigma^2))
+
+dl <- function(beta){
+  dlk <- D(l,"K")
+  dlr <- D(l,"r")
+  dlsigma <- D(l,"sigma")
+  K <- beta[1] 
+  r <- beta[2] 
+  sigma <- beta[3]
+  a <- eval(dlk)
+  b <- eval(dlr)
+  c <- eval(dlsigma)
+  return(c(a,b,c))
+}
+
+ddl <- function(beta){
+  dlkk <- D(D(l,"K"),"K")
+  dlkr <- D(D(l,"K"),"r")
+  dlksigma <- D(D(l,"K"),"sigma")
+  dlrr <- D(D(l,"r"),"r")
+  dlrsigma <- D(D(l,"r"),"sigma")
+  dlsigma2 <- D(D(l,"sigma"),"sigma")
+  K <- beta[1] 
+  r <- beta[2] 
+  sigma <- beta[3]
+  a <- c(eval(dlkk),eval(dlkr),eval(dlksigma),eval(dlkr),eval(dlrr),
+         eval(dlrsigma),eval(dlksigma),eval(dlrsigma),eval(dlsigma2))
+  m <- matrix(a,byrow=TRUE,nrow=3)
+  return(m)
+}
+
+#newton method
+a <- matrix(c(1200,0.2,0.5),nrow=3)
+delta <- matrix(c(1,1,1),nrow=3)
+while(crossprod(delta,delta)>=0.001){
+  b <- a
+  c <- matrix(dl(a),nrow=3)
+  d <- solve(ddl(a))
+  a <- a - d%*%c
+  delta <- a - b
+}
+a
+solve(-ddl(a))
+```
+
+<font size = 3>The start point is (1200,0.2,0.5), and we get  $K=820.5349872,~r=0.1926176, ~\sigma=0.6441323$.  
+The variance of $K,~r,~\sigma$ are $6.248530\cdot10^{4},~3.974068\cdot10^{-3},~2.074532\cdot10^{-2}$</font>
